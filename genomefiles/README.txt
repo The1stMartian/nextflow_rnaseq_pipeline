@@ -1,0 +1,1 @@
+Genome files for STAR and, if needed, Bowtie2 should be placed in this folder. Also add any fasta formatted genome files and genome annotation files (e.g. a gtf file).
