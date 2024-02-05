@@ -1,9 +1,17 @@
 # RNA-Seq Pipeline
-<i>An RNA-Seq pipeline for eukaryotic systems written in Python</i>
-C. Breuer 2024
+<i>An RNA-Seq pipeline for eukaryotic systems written in Python</i><br>
+C. Breuer, 2024
 
 # Overview:
 This pipeline is designed for the analysis of RNA-Seq data from eukaryotic systems. The offers quality assessment with FastQC, and calls pipeline RNA STAR, an efficient splicing-aware aligner via the linux (or WSL) command line. Additional scripts are provided for running differential expression analysis with DESeq2 in R, and for annotating those results with gene names using a GTF file. 
+
+# Outputs Include
+## Volcano plots and PCA analyses
+![Volcano Plot of differentially expressed genes and a PCA analysis:](./pics/figures.png)
+
+## Differential Gene Expression Tables
+![Differential Expression Tables](./pics/deseqout.png)
+
 
 # Prerequisites
 1) Linux or WSL. It is expected that this pipeline will be executed in a linux environment.
@@ -28,9 +36,44 @@ This pipeline is designed for the analysis of RNA-Seq data from eukaryotic syste
 5) Fasta formatted genome files and genome annotation files (e.g. .gtf) should be in ./genomefiles. 
 6) Edit the User Customization section of the rnaSeq.py script in any text editor. Specifically, change line 265 as needed to indicate the name of the genome you're mapping to. i.e. if you named the STAR genome "dm6" for Drosophila melanogaster build number 6, then that line should read g='dm6'.
 
+# File Prep (optional)
+1) Fastq files can be trimmed on adapters if desired. To do this, start a WSL terminal in the working directory and enter python ./scripts/runTrimmomatic.py. Follow the prompts to trim universal TruSeq adaptors from your reads. The script can be edited for other primer sequences.
+2) For quickly test for rRNA (or other) undesirable contaminants, the a small sample of each fastq file can be created. To do this, start a WSL terminal in the working directory and enter python./scripts/shrinkFastq.py. Follow the on-screen prompts to select the desired numbmer of reads in the small fastq outfiles (e.g. 250000 is often enough). See QC steps below for instructions on running the rRNA mapping.
+
 # Running the pipeline
 1) The pipeline can be run by executing the rnaSeq.py script with the command: python rnaSeq.py. 
+- The script will provide run options as screen prompts.
+- You may want to first run the script with only the FastQC option. At that point, you can examine your sequence quality and, if needed, trim the ends with Trimmomatic (wrapper and executable are provided in the scripts folder). 
 2) Follow the prompts to activate FastQC, alignment by STAR, and to use FeatureCounts. 
 3) Notes:
-- Default settings will result in STAR producing read counts as part of the alignment process. This will only occur if you input a gene annotation file when building your STAR genome.
+- Default STAR settings will result in STAR producing read counts as part of the alignment process. This will only occur if you input a gene annotation file when building your STAR genome.
 - STAR will output aligned files in .bam format. 
+
+# Running QC:
+1) To test for contaminating rRNA/tRNA/etc. follow the instructions above (File Prep) to sample the fastq files (or you can map the whole file, it will just take longer). Open a WSL terminal in the working directory and enter python ./scripts/map2rDNA.py to do the alignment. Alignment statistics will be output to a log file in the working directory. Note that you will have to have previously set up genome files for this mapping to work.
+
+# Differential Expression Analysis with DESeq2
+1) Follow the instructions in the DESeq manual to set up readcounts input files and metadata. The data (readcounts) file looks like this:
+
+gene	        Sample1	    Sample2	    Sample3     Sample4     Sample5     Sample6
+gene1       	2257	    2440	    2537	    611         501         413
+gene2       	0	        1	        0	        1           7           2
+gene3       	1217	    1394	    1239	    801         413         578         
+gene4       	0	        0	        0	        0           0           0
+gene5       	20	        19	        7	        12          15          4
+
+Here the samples 1-3 are controls and samples 3-6 are test. As such the metadata file looks like this:
+id	            genotype
+Sample1      	WT
+Sample2 	    WT
+Sample3 	    WT
+Sample4 	    Mutant
+Sample5         Mutant
+Sample6         Mutant
+
+- To analyze these files, load them into R using the DESeq2.R script in RStudio.
+- This will output a volcano plot with significantly changed genes highlighted in red, and a 2D principal component analysis plot to visually display sample variability.
+- To label the DESEq outfiles with gene level information, open the annotateRC.R script in R studio. Load your GTF file and follow the steps to merge the two tables.
+
+# Downstream Analysis
+- Though not covered here, differential gene expression profiles can be loaded into pathway analysis software (e.g. Ingenuity Pathway Analysis) to get a sense of the broader significance of your gene signatures.
