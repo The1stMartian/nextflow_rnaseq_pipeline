@@ -16,16 +16,16 @@ This pipeline is designed for the analysis of RNA-Seq data from eukaryotic syste
 # Prerequisites
 1) Linux or WSL. It is expected that this pipeline will be executed in a linux environment.
 2) Python3 and Java (for FastQC)
-- apt-install python3
-3) The RNA-STAR aligner should be installed. This can be done using the following commands in Ubuntu:
-- apt-get update
-- apt-install RNA-STAR
-- For more information, see the  [STAR manual].(https://physiology.med.cornell.edu/faculty/skrabanek/lab/angsd/lecture_notes/STARmanual.pdf).
-4) An RNA-STAR reference genome (see the STAR manual for commands). This requires you to have a fasta formatted genome file and (optionally) an annotations file (e.g. a .gtf file). <b>It is highly beneficial to include the GTF annotation file as this will allow STAR to tally read counts while doing the alignmenment.</b> Place the output STAR genome files in a folder named "genomefiles".
-5) For rDNA quality control mapping, an rRNA (or tRNA, etc.) fasta sequence and Bowtie2 are required. Bowtie2 can be installed with:
-- apt-get update
-- apt-install bowtie2
-- Follow the instructions for installing a bowtie genome. e.g. bowtie2-build <path/to/genome.fa> <genomeName>. Move the output genome files to the "genomefiles" folder.
+- Install with: "apt-install python3"
+3) The RNA-STAR aligner should be installed. This can be done using the following commands in Ubuntu:<br>
+"     apt-get update"<br>
+"     apt-install RNA-STAR"<br>
+     <i>For more information, see the  [STAR manual](https://physiology.med.cornell.edu/faculty/skrabanek/lab/angsd/lecture_notes/STARmanual.pdf).</i>
+4) An RNA-STAR reference genome (see the STAR manual for commands).<br>This requires you to have a fasta formatted genome file and (optionally) an annotations file (e.g. a .gtf file). <b>It is highly beneficial to include the GTF annotation file as this will allow STAR to tally read counts while doing the alignmenment.</b> Place the output STAR genome files in a folder named "genomefiles".
+5) For rDNA quality control mapping, an rRNA (or tRNA, etc.) fasta sequence and Bowtie2 are required. Bowtie2 can be installed with:<br>
+"apt-get update"<br>
+"apt-install bowtie2"<br>
+Follow the instructions for installing a bowtie genome. e.g. "bowtie2-build path/to/genome.fa yourGenomeName". Move the output genome files to the "genomefiles" folder.
 
 
 # Setup
@@ -53,25 +53,30 @@ This pipeline is designed for the analysis of RNA-Seq data from eukaryotic syste
 1) To test for contaminating rRNA/tRNA/etc. follow the instructions above (File Prep) to sample the fastq files (or you can map the whole file, it will just take longer). Open a WSL terminal in the working directory and enter python ./scripts/map2rDNA.py to do the alignment. Alignment statistics will be output to a log file in the working directory. Note that you will have to have previously set up genome files for this mapping to work.
 
 # Differential Expression Analysis with DESeq2
-1) Follow the instructions in the DESeq manual to set up readcounts input files and metadata. The data (readcounts) file looks like this:
+1) Follow the instructions in the DESeq manual to set up readcounts input files and metadata. The data (readcounts) file looks like this:<br>
 
-gene	        Sample1	    Sample2	    Sample3     Sample4     Sample5     Sample6
-gene1       	2257	    2440	    2537	    611         501         413
-gene2       	0	        1	        0	        1           7           2
-gene3       	1217	    1394	    1239	    801         413         578         
-gene4       	0	        0	        0	        0           0           0
-gene5       	20	        19	        7	        12          15          4
+
+
+|gene|Sample1|Sample2|Sample3|Sample4|Sample5|Sample6|
+|----|-------|-------|-------|-------|-------|-------|
+|gene1|2257|2440|2537|611|501|413|
+|gene2|3|0|1|0|1|7|2|
+|gene3|1217|1394|1239|801|413|578|       
+|gene4|0|0|0|0|0|0|
+|gene5|20|19|7|12|15|4|
 
 Here the samples 1-3 are controls and samples 3-6 are test. As such the metadata file looks like this:
-id	            genotype
-Sample1      	WT
-Sample2 	    WT
-Sample3 	    WT
-Sample4 	    Mutant
-Sample5         Mutant
-Sample6         Mutant
+|id|genotype|
+|--|--------|
+|Sample1|WT|
+|Sample2|WT|
+|Sample3|WT|
+|Sample4|Mutant|
+|Sample5|Mutant|
+|Sample6|Mutant|
 
-- To analyze these files, load them into R using the DESeq2.R script in RStudio.
+
+- To analyze these the data file, load both the data and metadata files into R using the ./scripts/DESeq2.R script in RStudio.
 - This will output a volcano plot with significantly changed genes highlighted in red, and a 2D principal component analysis plot to visually display sample variability.
 - To label the DESEq outfiles with gene level information, open the annotateRC.R script in R studio. Load your GTF file and follow the steps to merge the two tables.
 
