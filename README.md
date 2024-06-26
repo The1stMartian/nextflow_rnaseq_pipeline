@@ -1,4 +1,4 @@
-# RNA-Seq Pipeline
+# NextFlow RNA-Seq Pipeline
 <i>An RNA-Seq pipeline for eukaryotic systems written in Python</i><br>
 C. Breuer, 2024
 
